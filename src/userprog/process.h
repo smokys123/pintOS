@@ -2,7 +2,6 @@
 #define USERPROG_PROCESS_H
 
 #include "threads/thread.h"
-#include "threads/synch.h"
 
 /*load_flag define*/
 #define NO_LOAD 0

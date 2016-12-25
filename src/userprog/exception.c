@@ -1,15 +1,9 @@
 #include "userprog/exception.h"
 #include <inttypes.h>
 #include <stdio.h>
-#include <syscall-nr.h>
 #include "userprog/gdt.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
-#include "threads/synch.h"
-#include "threads/vaddr.h"
-#include "vm/page.h"
-#include "userprog/syscall.h"
-#include "userprog/process.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -131,8 +125,8 @@ page_fault (struct intr_frame *f)
   bool not_present;  /* True: not-present page, false: writing r/o page. */
   bool write;        /* True: access was write, false: access was read. */
   bool user;         /* True: access by user, false: access by kernel. */
-  void *fault_addr;  /* Fault address. *///page_fault가 발생한 가상주소
-  bool loaded = false;
+  void *fault_addr;  /* Fault address. */
+
   /* Obtain faulting address, the virtual address that was
      accessed to cause the fault.  It may point to code or to
      data.  It is not necessarily the address of the instruction
@@ -150,35 +144,14 @@ page_fault (struct intr_frame *f)
   page_fault_cnt++;
 
   /* Determine cause. */
-  not_present = (f->error_code & PF_P) == 0;    
+  not_present = (f->error_code & PF_P) == 0;
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
-
-  check_address(fault_addr, f->esp);
-    if(not_present){         //read_only페이지에 대한 접근일 경우
-      struct vm_entry *vm_e = find_vme(fault_addr);   //페이지 폴트가 일어난 주소에 대한 vm_entry 탐색
-      if(vm_e != NULL){
-        if(write && (vm_e->writable == 0))
-          exit(-1);
-        loaded = handle_mm_fault(vm_e);    
-      }
-      else 
-          exit(-1);
-    }
-    else
-        exit(-1);    
-    
-    if(loaded == false){
-      exit(-1);
-    }
-
-    //else
-      //exit(-1);
   //페이지 폴트 발생시 호출
-/*  exit(-1);
-   To implement virtual memory, delete the rest of the function
+  exit(-1);
+  /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
-     which fault_addr refers. 
+     which fault_addr refers. */
      printf ("Page fault at %p: %s error %s page in %s context.\n",
           fault_addr,
           not_present ? "not present" : "rights violation",
@@ -186,6 +159,5 @@ page_fault (struct intr_frame *f)
           user ? "user" : "kernel");
 //  exit(-1); // if pagefault occur , exit
   kill (f);
-*/
 }
 

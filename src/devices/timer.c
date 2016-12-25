@@ -93,8 +93,7 @@ timer_sleep (int64_t ticks)
 
   ASSERT (intr_get_level () == INTR_ON);
   while (timer_elapsed (start) < ticks) 
-    //thread_yield ();
-    thread_sleep(start + ticks);        //새로 구현한 스레드를 sleep queue에 삽입
+    thread_yield ();
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -173,20 +172,6 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-  //mlfqs 스케줄러일경우 interrupt 발생시 recent_cpu값 1증가
-  if( thread_mlfqs){
-    mlfqs_increment();
-    if( ticks % TIMER_FREQ  == 0){ //1초마다 load_avg, recent_cpu, priority 계산
-      mlfqs_load_avg();
-      mlfqs_recalc();
-    } 
-    if( ticks % 4 == 0)   //매 4초마다 priority 값 계산
-      mlfqs_priority( thread_current() ); 
-  }
-  //매 tick마다 get_next_tick_to_awake로 깨어날 스레드가 있는지 확인하고 있으면 깨워줌
-  if(ticks >= get_next_tick_to_awake())
-    thread_awake(ticks);
-
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

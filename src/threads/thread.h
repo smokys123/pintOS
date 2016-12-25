@@ -2,7 +2,6 @@
 #define THREADS_THREAD_H
 
 #include <debug.h>
-#include <hash.h>
 #include <list.h>
 #include <stdint.h>
 #include "threads/synch.h"
@@ -91,14 +90,9 @@ struct thread
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
-     
+
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-
-    int64_t wakeup_tick;               //깨어나야 할 tick을 저장 할 변수
-
-    int nice;                          //nice 값 추가
-    int recent_cpu;                    //recent_cpu 값 추가
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -118,10 +112,7 @@ struct thread
 	int exit_status;                    //exit 호출시 종료 status
 	/* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
-    struct hash vm;                     //스레드가 가진 vm_enty들을 관리하는 해시테이블
-    struct list mmap_list;
-	int mapid; 
- };
+  };
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -158,19 +149,5 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
-//alarm clock
-void thread_sleep(int64_t ticks);                  //실행중인 스레드를 sleep상태로 만듬
-void thread_awake(int64_t ticks);                  //sleep큐에서 awake해야할 스레드를 깨움
-void update_next_tick_to_awake(int64_t ticks);     //최소 tick값을 가진 스레드 저장
-int64_t get_next_tick_to_awake(void);              //next_tick_to_awake를 반환함
-//priority scheduling
-void test_max_priority(void);                      //현재 실행중인 스레드와 가장 높은 우선순위의 스레드의 우선순위를 비교해서 스케줄링하는 함수
-bool cmp_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);       //인자로 주어진 스레드  a ,b의 우선순위를 비교하는 함수
-
-void mlfqs_priority(struct thread *t);            //recent_cpu와 nice값을 이용해서 priority를 구하는 함수
-void mlfqs_recent_cpu(struct thread *t);          //recent_cpu 값을 계산하는 함수
-void mlfqs_load_avg(void);                        //load_avg 값을 계산하는 함수
-void mlfqs_increment(void);                       //recent_cpu 값을 1증가 시키는 함수
-void mlfqs_recalc(void);                          //모든 스레드의 recent_cpu와 priority값을 재계산하는 함수
 
 #endif /* threads/thread.h */
